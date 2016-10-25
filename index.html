@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Polyjuicelib by VATBox</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Polyjuicelib</h1>
+        <h2>Library that takes js and applies it to the given JSON object from the JVM</h2>
+        <a href="https://github.com/VATBox/polyjuicelib" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h2>
+<a id="polyjuice-library-for-mapping-json-objects-with-dynamic-javascript-code-in-scala" class="anchor" href="#polyjuice-library-for-mapping-json-objects-with-dynamic-javascript-code-in-scala" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Polyjuice library for mapping JSON objects with dynamic JavaScript code in Scala</h2>
+
+<h3>
+<a id="what-it-does" class="anchor" href="#what-it-does" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>What it does</h3>
+
+<pre><code>                                       +----------------+
+                                       |                |
+                                       | Dynamic        |
+                                       | JavaScript code|
+                                       |       +        |
+                                       +-------|--------+
+                                               |
+                                               |
+                                               |
+                                               v
+         +------------+                +---------------+                +-------------+
+   JVM   |            |                |               |  mapped object |             |      JVM
++-object---&gt; Json4s  +--object as JSON --&gt; Polyjuice +----------by-------&gt;  Json4s   +--mapped object-&gt;
+         | serialize  |                |               |  given js code | Deserialize |
+         |            |                |               |     as JSON    |             |
+         +------------+                +---------------+                +-------------+
+
+</code></pre>
+
+<h3>
+<a id="why-it-was-build" class="anchor" href="#why-it-was-build" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Why it was build</h3>
+
+<p>Let's say you have an expense report which is modeled something like this</p>
+
+<div class="highlight highlight-source-scala"><pre><span class="pl-k">case</span> <span class="pl-k">class</span> <span class="pl-en">Report</span>(<span class="pl-v">createdAt</span>: <span class="pl-en">Option</span>[<span class="pl-en">LocalDateTime</span>], <span class="pl-v">currency</span>: <span class="pl-en">Currency</span>, <span class="pl-v">amount</span>: <span class="pl-k">Double</span>, <span class="pl-v">country</span>: <span class="pl-en">Option</span>[<span class="pl-k">String</span>], <span class="pl-v">customFields</span>: <span class="pl-en">Map</span>[<span class="pl-k">String</span>,<span class="pl-en">CustomField</span>]) </pre></div>
+
+<p>Here at VATBox we are dealing with a lot of Reports (no they don't look like this unfortunately), each one of them have different custom fields which is customer depending.
+For example one customer can have a custom field called "center" with ~20 different values one for each country it has a subsidiary in.
+Since each "center" is in a different country there are different rules hence we need to <strong>map</strong> each report by different custom fields with countries etc.</p>
+
+<p><em>This way we can write customer's report specific mapping code and just "upload" it to an already running applications without having them altered for this.</em>  </p>
+
+<h3>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features</h3>
+
+<ul>
+<li>
+<a href="http://www.oracle.com/technetwork/articles/java/jf14-nashorn-2126515.html">Nashorn</a> </li>
+<li>Supports 'primitive' types or your own custom models via <a href="https://github.com/json4s/json4s">Json4s</a>
+</li>
+<li>Malicious code safety (endless loops, external libraries, native code)<br>
+</li>
+</ul>
+
+<h3>
+<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Examples</h3>
+
+<p>There are more examples in <a href="/src/test/scala/com/vatbox/polyjuice/PolyjuiceSpec.scala">Tests</a></p>
+
+<ul>
+<li>Return a String value of the "name" key</li>
+</ul>
+
+<div class="highlight highlight-source-scala"><pre><span class="pl-s"><span class="pl-pds">"</span>Return String<span class="pl-pds">"</span></span> in {
+        <span class="pl-k">val</span> <span class="pl-en">mapper</span> <span class="pl-k">=</span> <span class="pl-en">Polyjuice</span>.createMapper(varName <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>report<span class="pl-pds">"</span></span>, userCode <span class="pl-k">=</span> s<span class="pl-s"><span class="pl-pds">"""</span>return report.name;<span class="pl-pds">"""</span></span>)
+        <span class="pl-k">val</span> <span class="pl-en">triedT</span> <span class="pl-k">=</span> mapper.map[<span class="pl-k">String</span>](s<span class="pl-s"><span class="pl-pds">"""</span>{"name" : "hello World"}<span class="pl-pds">"""</span></span>)
+        triedT.futureValue.value shouldBe <span class="pl-s"><span class="pl-pds">"</span>hello World<span class="pl-pds">"</span></span>
+      }</pre></div>
+
+<ul>
+<li>Return an Int</li>
+</ul>
+
+<div class="highlight highlight-source-scala"><pre><span class="pl-s"><span class="pl-pds">"</span>Return Int<span class="pl-pds">"</span></span> in {
+        <span class="pl-k">val</span> <span class="pl-en">mapper</span> <span class="pl-k">=</span> <span class="pl-en">Polyjuice</span>.createMapper(<span class="pl-s"><span class="pl-pds">"</span>expense<span class="pl-pds">"</span></span>, s<span class="pl-s"><span class="pl-pds">"""</span>if (expense.expense &gt; 400) {return 1;} else {return 2;}<span class="pl-pds">"""</span></span>)
+        <span class="pl-k">val</span> <span class="pl-en">triedT</span> <span class="pl-k">=</span> mapper.map[<span class="pl-k">Int</span>](s<span class="pl-s"><span class="pl-pds">"""</span>{"expense" : 500}<span class="pl-pds">"""</span></span>)
+        triedT.futureValue.value shouldBe <span class="pl-c1">1</span>
+      }</pre></div>
+
+<ul>
+<li>Return a Double (well you got the idea)</li>
+</ul>
+
+<div class="highlight highlight-source-scala"><pre><span class="pl-s"><span class="pl-pds">"</span>Return Double<span class="pl-pds">"</span></span> in {
+        <span class="pl-k">val</span> <span class="pl-en">mapper</span> <span class="pl-k">=</span> <span class="pl-en">Polyjuice</span>.createMapper(<span class="pl-s"><span class="pl-pds">"</span>unused<span class="pl-pds">"</span></span>, s<span class="pl-s"><span class="pl-pds">"""</span>return 3.3;<span class="pl-pds">"""</span></span>)
+        <span class="pl-k">val</span> <span class="pl-en">triedT</span> <span class="pl-k">=</span> mapper.map[<span class="pl-k">Double</span>](s<span class="pl-s"><span class="pl-pds">"""</span>{"irrelevant" : 500}<span class="pl-pds">"""</span></span>)
+        triedT.futureValue.value shouldBe <span class="pl-c1">3.3</span>
+      }</pre></div>
+
+<ul>
+<li>Return a LocalDateTime</li>
+</ul>
+
+<div class="highlight highlight-source-scala"><pre><span class="pl-s"><span class="pl-pds">"</span>Return Date as LocalDateTime<span class="pl-pds">"</span></span> in {
+        <span class="pl-k">val</span> <span class="pl-en">mapper</span> <span class="pl-k">=</span> <span class="pl-en">Polyjuice</span>.createMapper(<span class="pl-s"><span class="pl-pds">"</span>unused<span class="pl-pds">"</span></span>, s<span class="pl-s"><span class="pl-pds">"""</span>return new Date();<span class="pl-pds">"""</span></span>)
+        <span class="pl-k">val</span> <span class="pl-en">triedT</span> <span class="pl-k">=</span> mapper.map[<span class="pl-en">LocalDateTime</span>](s<span class="pl-s"><span class="pl-pds">"""</span>{"irrelevant" : 500}<span class="pl-pds">"""</span></span>)
+        triedT.futureValue.value shouldBe a [<span class="pl-en">LocalDateTime</span>]
+      }</pre></div>
+
+<ul>
+<li>Now return that same Date but now as <a href="https://en.wikipedia.org/wiki/ISO_8601">8601</a> String</li>
+</ul>
+
+<div class="highlight highlight-source-scala"><pre><span class="pl-s"><span class="pl-pds">"</span>Return Date as String<span class="pl-pds">"</span></span> in {
+        <span class="pl-k">val</span> <span class="pl-en">mapper</span> <span class="pl-k">=</span> <span class="pl-en">Polyjuice</span>.createMapper(<span class="pl-s"><span class="pl-pds">"</span>unused<span class="pl-pds">"</span></span>, s<span class="pl-s"><span class="pl-pds">"""</span>return new Date();<span class="pl-pds">"""</span></span>)
+        <span class="pl-k">val</span> <span class="pl-en">triedT</span> <span class="pl-k">=</span> mapper.map[<span class="pl-k">String</span>](s<span class="pl-s"><span class="pl-pds">"""</span>{"irrelevant" : 500}<span class="pl-pds">"""</span></span>)
+        triedT.futureValue.value shouldBe a [<span class="pl-k">String</span>]
+        <span class="pl-c">// 2016-10-19T10:07:05.427Z</span>
+      }</pre></div>
+
+<ul>
+<li>Return a custom object</li>
+</ul>
+
+<div class="highlight highlight-source-scala"><pre><span class="pl-k">case</span> <span class="pl-k">class</span> <span class="pl-en">SimpleTestModel</span>(<span class="pl-v">name</span>: <span class="pl-k">String</span>, <span class="pl-v">value</span>: <span class="pl-k">Int</span>)</pre></div>
+
+<div class="highlight highlight-source-scala"><pre><span class="pl-s"><span class="pl-pds">"</span>Return Object as Object<span class="pl-pds">"</span></span> in {
+        <span class="pl-k">val</span> <span class="pl-en">mapper</span> <span class="pl-k">=</span> <span class="pl-en">Polyjuice</span>.createMapper(<span class="pl-s"><span class="pl-pds">"</span>report<span class="pl-pds">"</span></span>, s<span class="pl-s"><span class="pl-pds">"""</span>return {name: report.firstName, value : 5};<span class="pl-pds">"""</span></span>)
+        <span class="pl-k">val</span> <span class="pl-en">triedT</span> <span class="pl-k">=</span> mapper.map[<span class="pl-en">SimpleTestModel</span>](s<span class="pl-s"><span class="pl-pds">"""</span>{"firstName" : "Cool"}<span class="pl-pds">"""</span></span>)
+        triedT.futureValue.value shouldBe <span class="pl-en">SimpleTestModel</span>(<span class="pl-s"><span class="pl-pds">"</span>Cool<span class="pl-pds">"</span></span>, <span class="pl-c1">5</span>)
+      }</pre></div>
+
+<h3>
+<a id="safety-part---endless-loop" class="anchor" href="#safety-part---endless-loop" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Safety part - endless loop</h3>
+
+<div class="highlight highlight-source-scala"><pre>    <span class="pl-s"><span class="pl-pds">"</span>Infinite loop<span class="pl-pds">"</span></span> in {
+      <span class="pl-k">val</span> <span class="pl-en">mapper</span> <span class="pl-k">=</span> <span class="pl-en">Polyjuice</span>.createMapper(<span class="pl-s"><span class="pl-pds">"</span>whatever<span class="pl-pds">"</span></span>,
+        s<span class="pl-s"><span class="pl-pds">"""</span></span>
+<span class="pl-s">           |while(true){</span>
+<span class="pl-s">           |}<span class="pl-pds">"""</span></span>.stripMargin)
+      <span class="pl-k">val</span> <span class="pl-en">triedT</span> <span class="pl-k">=</span> mapper.map(jsonObject <span class="pl-k">=</span> s<span class="pl-s"><span class="pl-pds">"""</span>{ "name" : "somename" }<span class="pl-pds">"""</span></span>, timeout <span class="pl-k">=</span> <span class="pl-c1">3</span> seconds)
+      triedT.failed.futureValue shouldBe a [<span class="pl-en">TimedoutExecution</span>]
+    }</pre></div>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/VATBox/polyjuicelib/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/VATBox/polyjuicelib/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/VATBox/polyjuicelib"></a> is maintained by <a href="https://github.com/VATBox">VATBox</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
