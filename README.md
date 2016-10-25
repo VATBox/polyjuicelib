@@ -1,5 +1,5 @@
 ## Polyjuice library for mapping JSON objects with dynamic JavaScript code in Scala
-
+[![CircleCI](https://circleci.com/gh/VATBox/polyjuicelib.svg?style=svg)](https://circleci.com/gh/VATBox/polyjuicelib)
 ### What it does
 ```
                                        +----------------+
