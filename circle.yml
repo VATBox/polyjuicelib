@@ -3,8 +3,6 @@ machine:
     version: oraclejdk8
   environment:
     SBT_VERSION: 0.13.12
-    IVY2: "${HOME}/.ivy2"
-    ARTIFACTORY_CREDENTIALS: ".credentials"
 dependencies:
   cache_directories:
     - "~/.sbt"
@@ -12,17 +10,8 @@ dependencies:
   pre:
     - wget -q https://dl.bintray.com/sbt/debian/sbt-${SBT_VERSION}.deb
     - sudo dpkg -i sbt-${SBT_VERSION}.deb
-    - echo 'realm=Sonatype Nexus Repository Manager' > $IVY2/$ARTIFACTORY_CREDENTIALS
-    - echo 'host=oss.sonatype.org' >> $IVY2/$ARTIFACTORY_CREDENTIALS
-    - echo 'username='${USER_NAME} >> $IVY2/$ARTIFACTORY_CREDENTIALS
-    - echo 'passwd='${PASSWRD} >> $IVY2/$ARTIFACTORY_CREDENTIALS
   override:
     - sbt update
 test:
   override:
     - sbt test
-deployment:
-  feature:
-    branch: /.*/
-    commands:
-      - sbt publish
