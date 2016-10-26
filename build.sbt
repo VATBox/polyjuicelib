@@ -5,9 +5,17 @@ maintainer := "Tal <tal@vatbox.com>"
 packageSummary := "Polyjuice js mapper"
 packageDescription := "Library that takes js and applies it to the given JSON object from the JVM"
 version := "1.1.6"
-
 lazy val `polyjuice` = project.in(file("."))
-publishTo := Some("Maven Realm" at s"https://oss.sonatype.org/service/local/staging/deploy/maven2")
+
+credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
+publishTo := {
+  val nexus = "https://oss.sonatype.org/"
+  if (isSnapshot.value)
+    Some("snapshots" at nexus + "content/repositories/snapshots") 
+  else
+    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+}
+
 organization := "com.vatbox"
 scalaVersion := "2.11.8"
 
