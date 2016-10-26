@@ -12,7 +12,7 @@ dependencies:
   pre:
     - wget -q https://dl.bintray.com/sbt/debian/sbt-${SBT_VERSION}.deb
     - sudo dpkg -i sbt-${SBT_VERSION}.deb
-    - echo 'realm=Sonatype Realm' > $IVY2/$ARTIFACTORY_CREDENTIALS
+    - echo 'realm=Sonatype Nexus Repository Manager' > $IVY2/$ARTIFACTORY_CREDENTIALS
     - echo 'host=oss.sonatype.org' >> $IVY2/$ARTIFACTORY_CREDENTIALS
     - echo 'username='${USER_NAME} >> $IVY2/$ARTIFACTORY_CREDENTIALS
     - echo 'passwd='${PASSWRD} >> $IVY2/$ARTIFACTORY_CREDENTIALS
@@ -20,7 +20,7 @@ dependencies:
     - sbt update
 test:
   override:
-    - sbt clean test
+    - sbt test
 deployment:
   feature:
     branch: /.*/

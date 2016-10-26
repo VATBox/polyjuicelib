@@ -15,7 +15,7 @@ publishTo := {
   else
     Some("releases"  at nexus + "service/local/staging/deploy/maven2")
 }
-
+publishMavenStyle := true
 organization := "com.vatbox"
 scalaVersion := "2.11.8"
 
