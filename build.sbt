@@ -7,7 +7,7 @@ packageDescription := "Library that takes js and applies it to the given JSON ob
 version := "1.1.6"
 
 lazy val `polyjuice` = project.in(file("."))
-
+publishTo := Some("Maven Realm" at s"https://oss.sonatype.org/service/local/staging/deploy/maven2")
 organization := "com.vatbox"
 scalaVersion := "2.11.8"
 
