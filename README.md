@@ -37,6 +37,12 @@ Since each "center" is in a different country there are different rules hence we
 * Supports 'primitive' types or your own custom models via [Json4s](https://github.com/json4s/json4s)
 * Malicious code safety (endless loops, external libraries, native code)  
 
+### SBT
+
+```scala
+"com.vatbox" %% "polyjuice" % "1.1.6"
+```
+
 ### Examples
 There are more examples in [Tests](/src/test/scala/com/vatbox/polyjuice/PolyjuiceSpec.scala)
 * Return a String value of the "name" key
