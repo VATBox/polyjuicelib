@@ -34,8 +34,8 @@ case class UnknownJavaScriptException(th: Throwable) extends PolyjuiceException(
 
 case class NotAJsonObjectException(th: Throwable, notJson: String) extends PolyjuiceException(th)
 
-case class TimedoutExecution(duration: Duration) extends PolyjuiceException(s"Timeout of ${duration.toString} reached")
+case class TimedoutExecution(duration: Duration, throwable: Throwable) extends PolyjuiceException(s"Timeout of ${duration.toString} reached", throwable)
 
 case class TypeErrorException(codeType: String, expectedType: Class[_]) extends PolyjuiceException(s"Code returned [$codeType], but the expected type was [${expectedType.getSimpleName}]")
 
-case class InternalPolyjuiceException(msg: String) extends PolyjuiceException(msg)
+case class InternalPolyjuiceException(msg: String, throwable: Throwable) extends PolyjuiceException(msg, throwable)

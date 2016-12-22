@@ -49,6 +49,7 @@ libraryDependencies ++= {
     "org.json4s" %% "json4s-native" % Json4sVersion % "provided",
     "org.json4s" %% "json4s-ext" % Json4sVersion % "provided",
     /** Test dependencies */
-    "org.scalatest" %% "scalatest" % ScalaTest % "test" withSources()
+    "org.scalatest" %% "scalatest" % ScalaTest % "test" withSources(),
+    "org.scalacheck" %% "scalacheck" % "1.12.6" % "test"
   )
 }

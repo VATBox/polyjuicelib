@@ -103,22 +103,36 @@ trait PolyjuiceMapper extends LazyLogging {
   }
 
   def map[T: Manifest](jsonObject: String, timeout: Duration = 5 seconds)(implicit formats: Formats, executionContext: ExecutionContext): Future[Option[T]] = {
-    val (resultFuture, cancel) = interruptableFuture[Try[String]](fut => {
+    var mapResult: Option[Try[String]] = None
+    val (resultFuture, cancel) = interruptableFuture[Try[String]]( _ => {
       _map(jsonObject)
     })
+    resultFuture.foreach(result => mapResult = Some(result)) // signal to the second future that this one is finished
     Future.firstCompletedOf(Seq(resultFuture, Future {
-      Thread.sleep(timeout.toMillis)
-      cancel()
-      Failure(new CancellationException)
+      val interval = 500
+      var timeLeft = timeout.toMillis
+      while (mapResult.isEmpty) {
+        Thread.sleep(interval)
+        if (timeLeft <= 0) {
+          cancel()
+          mapResult = Some(Failure(new RuntimeException("Mapping was unable to finish before timeout")))
+        } else
+          timeLeft -= interval
+      }
+      if (timeLeft <= 0)
+        Failure(new CancellationException)
+      else {
+        mapResult.getOrElse(Failure(new RuntimeException("No result but we should have finished....")))
+      }
     })).flatMap { tryRes =>
         val parsedObj = tryRes.map(PolyjuiceNashornParser.deserialize[T])
         Future.fromTry(parsedObj)
       }.recoverWith{
       case ex: PolyjuiceException => Future.failed(ex)
-      case ex: CancellationException => Future.failed(TimedoutExecution(timeout))
+      case ex: CancellationException => Future.failed(TimedoutExecution(timeout, ex))
       case ex =>
         logger.debug(s"Cancelling javascript failed", ex)
-        Future.failed(InternalPolyjuiceException("Cancellation wasn't completed as expected"))
+        Future.failed(InternalPolyjuiceException("Cancellation wasn't completed as expected", ex))
     }
   }
 
