@@ -40,7 +40,7 @@ Since each "center" is in a different country there are different rules hence we
 ### SBT
 
 ```scala
-"com.vatbox" %% "polyjuice" % "1.1.6"
+"com.vatbox" %% "polyjuice" % "1.1.7"
 ```
 
 ### Examples
