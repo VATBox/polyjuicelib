@@ -4,7 +4,7 @@ name := """polyjuice"""
 maintainer := "Tal <tal@vatbox.com>"
 packageSummary := "Polyjuice js mapper"
 packageDescription := "Library that takes js and applies it to the given JSON object from the JVM"
-version := "1.1.7"
+version := "1.1.8"
 lazy val `polyjuice` = project.in(file("."))
 
 credentials += Credentials(Path.userHome / ".ivy2" / ".sonatypecredentials")
@@ -43,13 +43,15 @@ scalaVersion := "2.11.8"
 
 libraryDependencies ++= {
   val ScalaTest = "2.2.6"
-  val Json4sVersion = "3.4.0"
+  val Json4sVersion = "3.5.0"
+  val ScalaLoggingVersion = "3.5.0"
+  val ScalaCheckVersion = "1.12.6"
   Seq(
-    "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0" % "provided",
+    "com.typesafe.scala-logging" %% "scala-logging" % ScalaLoggingVersion % "provided",
     "org.json4s" %% "json4s-native" % Json4sVersion % "provided",
     "org.json4s" %% "json4s-ext" % Json4sVersion % "provided",
     /** Test dependencies */
     "org.scalatest" %% "scalatest" % ScalaTest % "test" withSources(),
-    "org.scalacheck" %% "scalacheck" % "1.12.6" % "test"
+    "org.scalacheck" %% "scalacheck" % ScalaCheckVersion % "test"
   )
 }

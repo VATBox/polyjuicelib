@@ -38,9 +38,28 @@ Since each "center" is in a different country there are different rules hence we
 * Malicious code safety (endless loops, external libraries, native code)  
 
 ### SBT
-
+For `json4s` __3.5.0__ and `scala-logging` __3.5.0__ use `polyjuice` version __1.1.8__
 ```scala
-"com.vatbox" %% "polyjuice" % "1.1.7"
+libraryDependencies ++= Seq(
+  "com.vatbox" %% "polyjuice" % "1.1.8",
+  
+  /* Unless you already have them */
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",
+  "org.json4s" %% "json4s-native" % "3.5.0",
+  "org.json4s" %% "json4s-ext" % "3.5.0"
+)
+```
+
+For `json4s` __3.4.0__ and `scala-logging` __3.1.0__ use `polyjuice` version __1.1.7__
+```scala
+libraryDependencies ++= Seq(
+  "com.vatbox" %% "polyjuice" % "1.1.7",
+  
+  /* Unless you already have them */
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.4.0",
+  "org.json4s" %% "json4s-native" % "3.4.0",
+  "org.json4s" %% "json4s-ext" % "3.1.0"
+)
 ```
 
 ### Examples
