@@ -119,10 +119,9 @@ trait PolyjuiceMapper extends LazyLogging {
         } else
           timeLeft -= interval
       }
-      if (timeLeft <= 0)
-        Failure(new CancellationException)
-      else {
-        mapResult.getOrElse(Failure(new RuntimeException("No result but we should have finished....")))
+      mapResult match {
+        case Some(tryValue) => tryValue
+        case None => Failure(new RuntimeException("No result but we should have finished...."))
       }
     })).flatMap { tryRes =>
         val parsedObj = tryRes.map(PolyjuiceNashornParser.deserialize[T])

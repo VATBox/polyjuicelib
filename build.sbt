@@ -4,7 +4,7 @@ name := """polyjuice"""
 maintainer := "Tal <tal@vatbox.com>"
 packageSummary := "Polyjuice js mapper"
 packageDescription := "Library that takes js and applies it to the given JSON object from the JVM"
-version := "1.1.8"
+version := "1.1.9"
 lazy val `polyjuice` = project.in(file("."))
 
 credentials += Credentials(Path.userHome / ".ivy2" / ".sonatypecredentials")
